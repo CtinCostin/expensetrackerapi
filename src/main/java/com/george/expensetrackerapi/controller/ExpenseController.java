@@ -19,8 +19,6 @@ public class ExpenseController {
 
     @GetMapping("/expenses")
     public List<Expense> getExpenses(Pageable page) {
-        int number = 1;
-        calculateFactorial(number);
         return expenseService.getAllExpenses(page).toList();
     }
 
@@ -47,7 +45,14 @@ public class ExpenseController {
         return expenseService.updateExpenseDetails(id, expense);
     }
 
-    public int calculateFactorial(int number) {
-        return number * calculateFactorial(number - 1);
+    @GetMapping("/expenses/category")
+    public List<Expense> getExpenseByCategory(@RequestParam String category, Pageable page) {
+        return expenseService.getExpenseByCategory(category, page);
     }
+
+    @GetMapping("/expenses/name")
+    public List<Expense> getExpenseByName(@RequestParam String keyword, Pageable page) {
+        return expenseService.getExpenseByName(keyword, page);
+    }
+
 }
