@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +34,8 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public void deleteExpenseById(Long id) {
-        expenseRepository.deleteById(id);
+        Expense expense = getExpenseById(id);
+        expenseRepository.delete(expense);
     }
 
     @Override
@@ -60,5 +62,16 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public List<Expense> getExpenseByName(String keyword, Pageable page) {
         return expenseRepository.findByNameContaining(keyword, page).toList();
+    }
+
+    @Override
+    public List<Expense> getExpenseByDate(Date startDate, Date endDate, Pageable page) {
+        if (startDate == null) {
+            startDate = new Date(0);
+        }
+        if (endDate == null) {
+            endDate = new Date(System.currentTimeMillis());
+        }
+        return expenseRepository.findByDateBetween(startDate, endDate, page).toList();
     }
 }
