@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -16,11 +15,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    @PostMapping("/register")
-    public ResponseEntity<User> createUser(@Valid @RequestBody UserModel user) {
-        return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
-    }
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> readAllUsers() {
