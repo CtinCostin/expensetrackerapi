@@ -10,6 +10,10 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -24,6 +28,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SessionFactory sessionFactory;
 
+    @Autowired
+    private PasswordEncoder bcryptEncoder;
+
     @Override
     public User createUser(UserModel user) {
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -31,6 +38,7 @@ public class UserServiceImpl implements UserService {
         }
         User newUser = new User();
         BeanUtils.copyProperties(user, newUser);
+        newUser.setPassword(bcryptEncoder.encode(newUser.getPassword()));
         return userRepository.save(newUser);
     }
 
@@ -61,7 +69,7 @@ public class UserServiceImpl implements UserService {
         User userToUpdate = readUser(id);
         userToUpdate.setName(user.getName() != null ? user.getName() : userToUpdate.getName());
         userToUpdate.setEmail(user.getEmail() != null ? user.getEmail() : userToUpdate.getEmail());
-        userToUpdate.setPassword(user.getPassword() != null ? user.getPassword() : userToUpdate.getPassword());
+        userToUpdate.setPassword(user.getPassword() != null ? bcryptEncoder.encode(user.getPassword()) : bcryptEncoder.encode(userToUpdate.getPassword()));
         userToUpdate.setAge(user.getAge() != null ? user.getAge() : userToUpdate.getAge());
         return userRepository.save(userToUpdate);
     }
@@ -70,5 +78,14 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
         User user = readUser(id);
         userRepository.delete(user);
+    }
+
+    @Override
+    public User getLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email).orElseThrow(() ->
+                new UsernameNotFoundException("User not found for the email " + email));
     }
 }
