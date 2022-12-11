@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @ResponseBody
-    public User readUser(Long id) {
+    public User readUser() {
 //        User user = null;
 //        Session session = sessionFactory.openSession();
 //        String hql = "FROM User U WHERE U.id = :user_id";
@@ -52,8 +52,9 @@ public class UserServiceImpl implements UserService {
 //        query.setParameter("user_id", id);
 //        user = (User) query.getResultList();
 //        return user;
-        return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("The user is not present for id " + id));
+        Long userId = getLoggedInUser().getId();
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("The user is not present for id " + userId));
     }
 
     @Override
@@ -65,8 +66,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(UserModel user, Long id) {
-        User userToUpdate = readUser(id);
+    public User updateUser(UserModel user) {
+        User userToUpdate = readUser();
         userToUpdate.setName(user.getName() != null ? user.getName() : userToUpdate.getName());
         userToUpdate.setEmail(user.getEmail() != null ? user.getEmail() : userToUpdate.getEmail());
         userToUpdate.setPassword(user.getPassword() != null ? bcryptEncoder.encode(user.getPassword()) : bcryptEncoder.encode(userToUpdate.getPassword()));
@@ -75,8 +76,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(Long id) {
-        User user = readUser(id);
+    public void deleteUser() {
+        User user = readUser();
         userRepository.delete(user);
     }
 
