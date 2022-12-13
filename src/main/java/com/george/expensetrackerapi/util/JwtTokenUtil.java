@@ -37,6 +37,7 @@ public class JwtTokenUtil {
         return getClaimFromToken(jwtToken, Claims::getSubject);
     }
 
+    //Functional programming
     private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
         return claimsResolver.apply(claims);
